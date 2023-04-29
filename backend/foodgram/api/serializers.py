@@ -10,27 +10,42 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.fields import IntegerField, SerializerMethodField
 from rest_framework.relations import PrimaryKeyRelatedField
 from rest_framework.serializers import ModelSerializer
+from rest_framework import serializers
 from users.models import Follow
 
 User = get_user_model()
 
+LIMIT_USERNAME_AND_PASSWORD = 150
+LIMIT_EMAIL = 254
+
 
 class CustomUserCreateSerializer(UserCreateSerializer):
+    username = serializers.RegexField(max_length=LIMIT_USERNAME_AND_PASSWORD,
+                                      regex=r'^[\w.@+-]+\Z', required=True)
+    email = serializers.EmailField(
+        max_length=LIMIT_EMAIL,
+        required=True,)
+    password = serializers.CharField(
+        max_length=LIMIT_USERNAME_AND_PASSWORD,
+        required=True,)
+
+
     class Meta:
         model = User
         fields = (
+            'email',
+            'id',
+            'username',
             'first_name',
             'last_name',
-            'email',
-            'username',
-            'password',
+            'password'
         )
 
 
 class CustomUserSerializer(UserSerializer):
 
     is_subscribed = SerializerMethodField(read_only=True)
-
+    
     class Meta:
         model = User
         fields = (
