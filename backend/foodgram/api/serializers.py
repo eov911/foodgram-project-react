@@ -5,12 +5,11 @@ from django.shortcuts import get_object_or_404
 from djoser.serializers import UserCreateSerializer, UserSerializer
 from drf_extra_fields.fields import Base64ImageField
 from recipes.models import Ingredient, IngredientInRecipe, Recipe, Tag
-from rest_framework import status
+from rest_framework import serializers, status
 from rest_framework.exceptions import ValidationError
 from rest_framework.fields import IntegerField, SerializerMethodField
 from rest_framework.relations import PrimaryKeyRelatedField
 from rest_framework.serializers import ModelSerializer
-from rest_framework import serializers
 from users.models import Follow
 
 User = get_user_model()
@@ -29,7 +28,6 @@ class CustomUserCreateSerializer(UserCreateSerializer):
         max_length=LIMIT_USERNAME_AND_PASSWORD,
         required=True,)
 
-
     class Meta:
         model = User
         fields = (
@@ -45,7 +43,7 @@ class CustomUserCreateSerializer(UserCreateSerializer):
 class CustomUserSerializer(UserSerializer):
 
     is_subscribed = SerializerMethodField(read_only=True)
-    
+
     class Meta:
         model = User
         fields = (
