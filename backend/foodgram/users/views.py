@@ -1,5 +1,5 @@
 from api.pagination import CustomPagination
-from api.serializers import CustomUserSerializer
+from api.serializers import CustomUserSerializer, FollowSerializer
 from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404
 from djoser.views import UserViewSet
@@ -30,14 +30,14 @@ class CustomUserViewSet(UserViewSet):
 
         if request.method == 'POST':
             serializer = FollowSerializer(author,
-                                             data=request.data,
-                                             context={"request": request})
+                                          data=request.data,
+                                          context={"request": request})
             serializer.is_valid(raise_exception=True)
-            Subscribe.objects.create(user=user, author=author)
+            Follow.objects.create(user=user, author=author)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
 
         if request.method == 'DELETE':
-            subscription = get_object_or_404(Subscribe,
+            subscription = get_object_or_404(Follow,
                                              user=user,
                                              author=author)
             subscription.delete()
@@ -52,6 +52,6 @@ class CustomUserViewSet(UserViewSet):
         queryset = User.objects.filter(subscribing__user=user)
         pages = self.paginate_queryset(queryset)
         serializer = FollowSerializer(pages,
-                                         many=True,
-                                         context={'request': request})
+                                      many=True,
+                                      context={'request': request})
         return self.get_paginated_response(serializer.data)
