@@ -1,64 +1,42 @@
 from django.contrib import admin
+from django.contrib.admin import display
 
-from .models import Favourite, Ingredient, Recipe, Shopping, Tag
-
-
-class IngredientsRecipeLine(admin.TabularInline):
-    """ Связь  ингридиентов в рецепте """
-    model = Recipe.ingredients.through
+from .models import (Favourite, Ingredient, IngredientInRecipe, Recipe,
+                     ShoppingCart, Tag)
 
 
-class IngredientAdmin(admin.ModelAdmin):
-    """ Панельь управление ингридиентами """
-    list_display = ('name', 'measurement_unit')
-    search_fields = ('name', )
-    list_filter = ('name', )
-    empty_value_display = '-пусто-'
-
-
-class TagAdmin(admin.ModelAdmin):
-    """ Панель управление тегами """
-    list_display = ('name', 'color', 'slug')
-    search_fields = ('name', 'slug')
-    list_filter = ('name', )
-    empty_value_display = '-пусто-'
-
-
+@admin.register(Recipe)
 class RecipeAdmin(admin.ModelAdmin):
-    """ Панель управление рецептами """
-    list_display = ('name', 'author', 'favorites')
-    search_fields = ('author', 'name')
-    list_filter = ('tags', )
-    filter_horizontal = ('tags', )
-    empty_value_display = '-пусто-'
-    inlines = (IngredientsRecipeLine,)
+    list_display = ('name', 'id', 'author', 'added_in_favorites')
+    readonly_fields = ('added_in_favorites',)
+    list_filter = ('author', 'name', 'tags',)
 
-    def favourites(self, obj):
-        if Favourite.objects.filter(recipe=obj).exists():
-            return Favourite.objects.filter(recipe=obj).count()
-        return 0
-
-    favourites.short_description = 'Количество добавлений рецепта в избранное'
+    @display(description='Количество в избранных')
+    def added_in_favorites(self, obj):
+        return obj.favorites.count()
 
 
-class FavoriteAdmin(admin.ModelAdmin):
-    """ Панель управление подписками """
-    list_display = ('user', 'recipe')
-    list_filter = ('user', 'recipe')
-    search_fields = ('user', 'recipe')
-    empty_value_display = '-пусто-'
+@admin.register(Ingredient)
+class IngredientAdmin(admin.ModelAdmin):
+    list_display = ('name', 'measurement_unit',)
+    list_filter = ('name',)
 
 
+@admin.register(Tag)
+class TagAdmin(admin.ModelAdmin):
+    list_display = ('name', 'color', 'slug',)
+
+
+@admin.register(ShoppingCart)
 class ShoppingCartAdmin(admin.ModelAdmin):
-    """ Панель список покупок """
-    list_display = ('recipe', 'user')
-    list_filter = ('recipe', 'user')
-    search_fields = ('user', )
-    empty_value_display = '-пусто-'
+    list_display = ('user', 'recipe',)
 
 
-admin.site.register(Ingredient)
-admin.site.register(Tag)
-admin.site.register(Favourite)
-admin.site.register(Recipe)
-admin.site.register(Shopping)
+@admin.register(Favourite)
+class FavouriteAdmin(admin.ModelAdmin):
+    list_display = ('user', 'recipe',)
+
+
+@admin.register(IngredientInRecipe)
+class IngredientInRecipe(admin.ModelAdmin):
+    list_display = ('recipe', 'ingredient', 'amount',)

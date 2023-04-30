@@ -5,43 +5,26 @@ from django.shortcuts import get_object_or_404
 from djoser.serializers import UserCreateSerializer, UserSerializer
 from drf_extra_fields.fields import Base64ImageField
 from recipes.models import Ingredient, IngredientInRecipe, Recipe, Tag
-from rest_framework import serializers, status
+from rest_framework import status
 from rest_framework.exceptions import ValidationError
 from rest_framework.fields import IntegerField, SerializerMethodField
 from rest_framework.relations import PrimaryKeyRelatedField
 from rest_framework.serializers import ModelSerializer
-from users.models import Follow
+from users.models import Subscribe
 
 User = get_user_model()
 
-LIMIT_USERNAME_AND_PASSWORD = 150
-LIMIT_EMAIL = 254
-
 
 class CustomUserCreateSerializer(UserCreateSerializer):
-    username = serializers.RegexField(max_length=LIMIT_USERNAME_AND_PASSWORD,
-                                      regex=r'^[\w.@+-]+\Z', required=True)
-    email = serializers.EmailField(
-        max_length=LIMIT_EMAIL,
-        required=True,)
-    password = serializers.CharField(
-        max_length=LIMIT_USERNAME_AND_PASSWORD,
-        required=True,)
-
     class Meta:
         model = User
-        fields = (
-            'email',
-            'id',
-            'username',
-            'first_name',
-            'last_name',
-            'password'
+        fields = tuple(User.REQUIRED_FIELDS) + (
+            User.USERNAME_FIELD,
+            'password',
         )
 
 
 class CustomUserSerializer(UserSerializer):
-
     is_subscribed = SerializerMethodField(read_only=True)
 
     class Meta:
@@ -59,10 +42,10 @@ class CustomUserSerializer(UserSerializer):
         user = self.context.get('request').user
         if user.is_anonymous:
             return False
-        return Follow.objects.filter(user=user, author=obj).exists()
+        return Subscribe.objects.filter(user=user, author=obj).exists()
 
 
-class FollowSerializer(CustomUserSerializer):
+class SubscribeSerializer(CustomUserSerializer):
     recipes_count = SerializerMethodField()
     recipes = SerializerMethodField()
 
@@ -75,7 +58,7 @@ class FollowSerializer(CustomUserSerializer):
     def validate(self, data):
         author = self.instance
         user = self.context.get('request').user
-        if Follow.objects.filter(author=author, user=user).exists():
+        if Subscribe.objects.filter(author=author, user=user).exists():
             raise ValidationError(
                 detail='Вы уже подписаны на этого пользователя!',
                 code=status.HTTP_400_BAD_REQUEST
@@ -197,7 +180,7 @@ class RecipeWriteSerializer(ModelSerializer):
             ingredient = get_object_or_404(Ingredient, id=item['id'])
             if ingredient in ingredients_list:
                 raise ValidationError({
-                    'ingredients': 'Ингредиенты не могут повторяться!'
+                    'ingredients': 'Ингридиенты не могут повторяться!'
                 })
             if int(item['amount']) <= 0:
                 raise ValidationError({
