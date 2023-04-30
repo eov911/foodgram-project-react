@@ -5,11 +5,16 @@ from .models import (Favourite, Ingredient, IngredientInRecipe, Recipe,
                      ShoppingCart, Tag)
 
 
+class IngredientRecipeInline(admin.TabularInline):
+    model = Recipe.ingredients.through
+
+
 @admin.register(Recipe)
 class RecipeAdmin(admin.ModelAdmin):
     list_display = ('name', 'id', 'author', 'added_in_favorites')
     readonly_fields = ('added_in_favorites',)
     list_filter = ('author', 'name', 'tags',)
+    inlines = (IngredientRecipeInline,)
 
     @display(description='Количество в избранных')
     def added_in_favorites(self, obj):
@@ -38,5 +43,5 @@ class FavouriteAdmin(admin.ModelAdmin):
 
 
 @admin.register(IngredientInRecipe)
-class IngredientInRecipe(admin.ModelAdmin):
+class IngredientInRecipeAdmin(admin.ModelAdmin):
     list_display = ('recipe', 'ingredient', 'amount',)
