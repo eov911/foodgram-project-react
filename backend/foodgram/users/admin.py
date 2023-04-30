@@ -1,7 +1,7 @@
 
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
-
+from rest_framework.authtoken.models import TokenProxy
 from .models import Subscribe, User
 
 
@@ -20,3 +20,6 @@ class UserAdmin(UserAdmin):
 @admin.register(Subscribe)
 class SubscribeAdmin(admin.ModelAdmin):
     list_display = ('user', 'author',)
+
+
+admin.site.unregister(TokenProxy)
