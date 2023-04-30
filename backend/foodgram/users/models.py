@@ -15,6 +15,16 @@ class User(AbstractUser):
         max_length=254,
         unique=True,
     )
+    first_name = models.CharField(
+        verbose_name='Имя',
+        max_length=150,
+        blank=False
+    )
+    last_name = models.CharField(
+        verbose_name='Фамилия',
+        max_length=150,
+        blank=False
+    )
 
     class Meta:
         ordering = ['id']
