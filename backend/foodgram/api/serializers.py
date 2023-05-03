@@ -64,6 +64,7 @@ class SubscribeSerializer(CustomUserSerializer):
                 code=status.HTTP_400_BAD_REQUEST
             )
         if user == author:
+            print('yes')
             raise ValidationError(
                 detail='Вы не можете подписаться на самого себя!',
                 code=status.HTTP_400_BAD_REQUEST
