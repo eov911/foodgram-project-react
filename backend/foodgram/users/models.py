@@ -55,7 +55,7 @@ class Subscribe(models.Model):
             raise ValidationError("Нельзя на себя подписаться")
 
     class Meta:
-        ordering = ['-id']
+        ordering = ('-id',)
         constraints = [
             UniqueConstraint(fields=['user', 'author'],
                              name='unique_subscription')
