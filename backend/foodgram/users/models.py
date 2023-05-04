@@ -1,7 +1,6 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
-from django.db.models import UniqueConstraint
-from django.core.exceptions import ValidationError
+from django.db.models import UniqueConstraint, CheckConstraint
 
 
 class User(AbstractUser):
@@ -39,27 +38,36 @@ class User(AbstractUser):
 class Subscribe(models.Model):
     user = models.ForeignKey(
         User,
+        blank=False,
         related_name='subscriber',
         verbose_name="Подписчик",
         on_delete=models.CASCADE,
     )
     author = models.ForeignKey(
         User,
+        blank=False,
         related_name='subscribing',
         verbose_name="Автор",
         on_delete=models.CASCADE,
     )
 
-    def clean(self):
-        if self.author.id == self.user.id:
-            raise ValidationError("Нельзя на себя подписаться")
+    # def clean(self):
+    #     print(self)
+    #     if self.author.id == self.user.id:
+    #         raise ValidationError('Нельзя подписаться на самого себя')
+    #     if (self is None):
+    #         raise ValidationError('Заполните одно из полей')
+    # def save(self, *args, **kwargs):
+    #     self.full_clean()
+    #     return super().save(*args, **kwargs)
 
     class Meta:
         ordering = ('-id',)
         constraints = [
             UniqueConstraint(fields=['user', 'author'],
-                             name='unique_subscription')
+                             name='unique_subscription'),
+            CheckConstraint(check=~models.Q(user=models.F('author')),
+                            name='Нельзя на себя подписаться')
         ]
         verbose_name = 'Подписка'
         verbose_name_plural = 'Подписки'
-
