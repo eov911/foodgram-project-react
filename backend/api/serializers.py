@@ -46,6 +46,7 @@ class CustomUserSerializer(UserSerializer):
 
 
 class SubscribeSerializer(CustomUserSerializer):
+
     recipes_count = SerializerMethodField()
     recipes = SerializerMethodField()
 
@@ -53,7 +54,7 @@ class SubscribeSerializer(CustomUserSerializer):
         fields = CustomUserSerializer.Meta.fields + (
             'recipes_count', 'recipes'
         )
-        read_only_fields = ('email', 'username')
+        read_only_fields = ('email', 'username', 'first_name', 'last_name')
 
     def validate(self, data):
         author = self.instance
@@ -64,7 +65,6 @@ class SubscribeSerializer(CustomUserSerializer):
                 code=status.HTTP_400_BAD_REQUEST
             )
         if user == author:
-            print('yes')
             raise ValidationError(
                 detail='Вы не можете подписаться на самого себя!',
                 code=status.HTTP_400_BAD_REQUEST
