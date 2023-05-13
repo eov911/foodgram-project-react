@@ -27,7 +27,7 @@ class User(AbstractUser):
     )
 
     class Meta:
-        ordering = ['id']
+        ordering = ('id',)
         verbose_name = 'Пользователь'
         verbose_name_plural = 'Пользователи'
 
@@ -50,16 +50,6 @@ class Subscribe(models.Model):
         verbose_name="Автор",
         on_delete=models.CASCADE,
     )
-
-    # def clean(self):
-    #     print(self)
-    #     if self.author.id == self.user.id:
-    #         raise ValidationError('Нельзя подписаться на самого себя')
-    #     if (self is None):
-    #         raise ValidationError('Заполните одно из полей')
-    # def save(self, *args, **kwargs):
-    #     self.full_clean()
-    #     return super().save(*args, **kwargs)
 
     class Meta:
         ordering = ('-id',)
