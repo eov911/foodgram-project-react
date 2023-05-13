@@ -25,12 +25,12 @@ class Tag(models.Model):
         'Цветовой HEX-код',
         unique=True,
         max_length=7,
-        validators=[
+        validators=(
             RegexValidator(
                 regex='^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$',
                 message='Введенное значение не является цветом в формате HEX!'
-            )
-        ]
+            ),
+        )
     )
     slug = models.SlugField('Уникальный слаг', unique=True, max_length=200)
 
@@ -58,7 +58,7 @@ class Recipe(models.Model):
     )
     cooking_time = models.PositiveSmallIntegerField(
         'Время приготовления',
-        validators=[MinValueValidator(1, message='Минимальное значение 1!')]
+        validators=(MinValueValidator(1, message='Минимальное значение 1!'),)
     )
     ingredients = models.ManyToManyField(
         Ingredient,
@@ -95,7 +95,7 @@ class IngredientInRecipe(models.Model):
     )
     amount = models.PositiveSmallIntegerField(
         'Количество',
-        validators=[MinValueValidator(1, message='Минимальное количество 1!')]
+        validators=(MinValueValidator(1, message='Минимальное количество 1!'),)
     )
 
     class Meta:
